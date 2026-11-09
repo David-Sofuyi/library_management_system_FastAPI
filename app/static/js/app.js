@@ -3,7 +3,7 @@ let state = {
   books: [],
   activeLoans: [],
   allLoans: [],
-  currentTab: 'books',
+  currentTab: 'home',
   searchQuery: ''
 };
 
@@ -40,6 +40,7 @@ function formatDate(dateString) {
 async function loadAllData() {
   await Promise.all([loadBooks(), loadActiveLoans(), loadAllLoans()]);
   updateStats();
+  renderHomePreview();
 }
 
 async function loadBooks(query = '') {
@@ -49,6 +50,7 @@ async function loadBooks(query = '') {
     if (!res.ok) throw new Error('Failed to fetch books');
     state.books = await res.json();
     renderBooks();
+    renderHomePreview();
   } catch (err) {
     showToast(err.message, 'error');
   }
@@ -92,66 +94,87 @@ function updateStats() {
 
   const activeLoans = state.activeLoans.length;
 
-  document.getElementById('stat-total-titles').textContent = totalTitles;
-  document.getElementById('stat-total-copies').textContent = totalCopies;
-  document.getElementById('stat-available-copies').textContent = availableCopies;
-  document.getElementById('stat-active-loans').textContent = activeLoans;
+  document.querySelectorAll('.stat-total-titles').forEach(el => el.textContent = totalTitles);
+  document.querySelectorAll('.stat-total-copies').forEach(el => el.textContent = totalCopies);
+  document.querySelectorAll('.stat-available-copies').forEach(el => el.textContent = availableCopies);
+  document.querySelectorAll('.stat-active-loans').forEach(el => el.textContent = activeLoans);
 }
 
 // Render Functions
+function createBookCardHtml(book) {
+  const inStock = book.available_copies > 0;
+  const statusBadge = inStock
+    ? `<span class="badge badge-in-stock">● ${book.available_copies} Available</span>`
+    : `<span class="badge badge-out-of-stock">● Out of Stock</span>`;
+
+  return `
+    <div class="book-card">
+      <div class="book-header">
+        <h3 class="book-title">${escapeHtml(book.title)}</h3>
+        <div class="book-author">by ${escapeHtml(book.author)}</div>
+      </div>
+      <div class="book-meta">
+        <div class="meta-row">
+          <span><strong>ISBN:</strong> <code>${escapeHtml(book.isbn)}</code></span>
+          ${statusBadge}
+        </div>
+        <div class="meta-row">
+          <span><strong>Total Copies:</strong> ${book.total_copies}</span>
+          <span><strong>Borrowed:</strong> ${book.total_copies - book.available_copies}</span>
+        </div>
+      </div>
+      <div class="book-actions">
+        <button class="btn btn-primary btn-sm" onclick="openBorrowModal('${escapeHtml(book.isbn)}')" ${!inStock ? 'disabled style="opacity:0.5;cursor:not-allowed;"' : ''}>
+          Borrow
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="openEditModal(${book.id}, '${escapeHtml(book.title)}', '${escapeHtml(book.author)}', ${book.total_copies})">
+          Edit
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="confirmDeleteBook(${book.id}, '${escapeHtml(book.title)}')">
+          Delete
+        </button>
+      </div>
+    </div>
+  `;
+}
+
 function renderBooks() {
   const container = document.getElementById('books-container');
+  if (!container) return;
+
   if (!state.books || state.books.length === 0) {
     container.innerHTML = `
       <div class="empty-state" style="grid-column: 1 / -1;">
-        <h3>No books found</h3>
-        <p>Get started by clicking "+ Add Book" above.</p>
+        <h3>No books found in catalog</h3>
+        <p>Get started by clicking "+ Add New Book" above.</p>
       </div>`;
     return;
   }
 
-  container.innerHTML = state.books
-    .map(book => {
-      const inStock = book.available_copies > 0;
-      const statusBadge = inStock
-        ? `<span class="badge badge-in-stock">${book.available_copies} Available</span>`
-        : `<span class="badge badge-out-of-stock">Out of Stock</span>`;
+  container.innerHTML = state.books.map(createBookCardHtml).join('');
+}
 
-      return `
-        <div class="book-card">
-          <div class="book-header">
-            <h3 class="book-title">${escapeHtml(book.title)}</h3>
-            <div class="book-author">by ${escapeHtml(book.author)}</div>
-          </div>
-          <div class="book-meta">
-            <div class="meta-row">
-              <span><strong>ISBN:</strong> <code>${escapeHtml(book.isbn)}</code></span>
-              ${statusBadge}
-            </div>
-            <div class="meta-row">
-              <span><strong>Total Owned:</strong> ${book.total_copies}</span>
-              <span><strong>On Loan:</strong> ${book.total_copies - book.available_copies}</span>
-            </div>
-          </div>
-          <div class="book-actions">
-            <button class="btn btn-primary btn-sm" onclick="openBorrowModal('${escapeHtml(book.isbn)}')" ${!inStock ? 'disabled style="opacity:0.6;cursor:not-allowed;"' : ''}>
-              Borrow
-            </button>
-            <button class="btn btn-secondary btn-sm" onclick="openEditModal(${book.id}, '${escapeHtml(book.title)}', '${escapeHtml(book.author)}', ${book.total_copies})">
-              Edit
-            </button>
-            <button class="btn btn-danger btn-sm" onclick="confirmDeleteBook(${book.id}, '${escapeHtml(book.title)}')">
-              Delete
-            </button>
-          </div>
-        </div>
-      `;
-    })
-    .join('');
+function renderHomePreview() {
+  const container = document.getElementById('home-preview-container');
+  if (!container) return;
+
+  if (!state.books || state.books.length === 0) {
+    container.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1;">
+        <p>No books added yet. Click "+ Add New Book" to begin building your library.</p>
+      </div>`;
+    return;
+  }
+
+  // Show up to 3 featured books on the landing page
+  const previewBooks = state.books.slice(0, 3);
+  container.innerHTML = previewBooks.map(createBookCardHtml).join('');
 }
 
 function renderActiveLoans() {
   const tbody = document.getElementById('active-loans-tbody');
+  if (!tbody) return;
+
   if (!state.activeLoans || state.activeLoans.length === 0) {
     tbody.innerHTML = `
       <tr>
@@ -183,6 +206,8 @@ function renderActiveLoans() {
 
 function renderLoanHistory() {
   const tbody = document.getElementById('history-loans-tbody');
+  if (!tbody) return;
+
   if (!state.allLoans || state.allLoans.length === 0) {
     tbody.innerHTML = `
       <tr>
@@ -218,12 +243,27 @@ function switchTab(tabName) {
     btn.classList.toggle('active', btn.dataset.tab === tabName);
   });
 
-  document.getElementById('view-books').style.display = tabName === 'books' ? 'block' : 'none';
-  document.getElementById('view-active-loans').style.display = tabName === 'active-loans' ? 'block' : 'none';
-  document.getElementById('view-history').style.display = tabName === 'history' ? 'block' : 'none';
+  const viewHome = document.getElementById('view-home');
+  const viewBooks = document.getElementById('view-books');
+  const viewActiveLoans = document.getElementById('view-active-loans');
+  const viewHistory = document.getElementById('view-history');
 
-  if (tabName === 'active-loans') loadActiveLoans();
-  if (tabName === 'history') loadAllLoans();
+  if (viewHome) viewHome.style.display = tabName === 'home' ? 'block' : 'none';
+  if (viewBooks) viewBooks.style.display = tabName === 'books' ? 'block' : 'none';
+  if (viewActiveLoans) viewActiveLoans.style.display = tabName === 'active-loans' ? 'block' : 'none';
+  if (viewHistory) viewHistory.style.display = tabName === 'history' ? 'block' : 'none';
+
+  if (tabName === 'home') {
+    renderHomePreview();
+  } else if (tabName === 'books') {
+    renderBooks();
+  } else if (tabName === 'active-loans') {
+    loadActiveLoans();
+  } else if (tabName === 'history') {
+    loadAllLoans();
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // Modal Helpers
@@ -250,7 +290,7 @@ function openEditModal(id, title, author, totalCopies) {
   openModal('modal-edit-book');
 }
 
-// Forms Handlers
+// Form Handlers
 async function handleAddBook(e) {
   e.preventDefault();
   const isbn = document.getElementById('add-isbn').value.trim();

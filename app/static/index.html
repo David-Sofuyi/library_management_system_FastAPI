@@ -13,14 +13,13 @@
   <header class="navbar">
     <div class="nav-container">
       <a href="/" class="nav-brand">
-        <svg fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM3.45 9L12 4.34 20.55 9 12 13.66 3.45 9zM5 12.3v4.92c0 1.63 3.13 3.78 7 3.78s7-2.15 7-3.78V12.3l-7 3.82-7-3.82z"/>
-        </svg>
+        <div class="nav-brand-icon">📚</div>
         Freshie LMS
       </a>
 
       <nav class="nav-tabs">
-        <button class="nav-tab-btn active" data-tab="books" onclick="switchTab('books')">Books Catalog</button>
+        <button class="nav-tab-btn active" data-tab="home" onclick="switchTab('home')">Home</button>
+        <button class="nav-tab-btn" data-tab="books" onclick="switchTab('books')">Books Catalog</button>
         <button class="nav-tab-btn" data-tab="active-loans" onclick="switchTab('active-loans')">Active Loans</button>
         <button class="nav-tab-btn" data-tab="history" onclick="switchTab('history')">Loan History</button>
       </nav>
@@ -37,46 +36,133 @@
   <!-- Main Content -->
   <main class="container">
 
-    <!-- KPI Stats Cards -->
-    <section class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon indigo">📚</div>
-        <div class="stat-info">
-          <h3>Total Titles</h3>
-          <p id="stat-total-titles">0</p>
+    <!-- ====================================================================
+         TAB 1: HOME / LANDING PAGE
+         ==================================================================== -->
+    <section id="view-home">
+      
+      <!-- Hero Section with Pinterest Featured Artwork -->
+      <div class="hero-section">
+        <div class="hero-content">
+          <div class="hero-pill">
+            <span class="hero-pill-dot"></span>
+            Next-Generation Library System
+          </div>
+          <h1 class="hero-title">
+            Welcome to Freshie LMS<br>
+            <span class="gradient-text">Where Stories &amp; Knowledge Meet</span>
+          </h1>
+          <p class="hero-description">
+            Experience an intuitive, beautifully crafted library platform. Track book inventory with precision, handle member loans effortlessly, and explore literary worlds with real-time availability.
+          </p>
+          <div class="hero-cta-group">
+            <button class="btn btn-primary" onclick="switchTab('books')">Explore Catalog 📚</button>
+            <button class="btn btn-secondary" onclick="openBorrowModal()">Quick Borrow 📖</button>
+            <button class="btn btn-secondary" onclick="openModal('modal-add-book')">+ Add New Book</button>
+          </div>
+          <div class="hero-metrics">
+            <div class="hero-metric-item">
+              <h4>Real-Time</h4>
+              <span>Inventory Sync</span>
+            </div>
+            <div class="hero-metric-item">
+              <h4>One-Click</h4>
+              <span>Lending &amp; Returns</span>
+            </div>
+            <div class="hero-metric-item">
+              <h4>FastAPI</h4>
+              <span>High Performance</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-visual">
+          <div class="hero-image-frame">
+            <div class="floating-card card-top">
+              <div class="floating-card-icon" style="background:#eef2ff; color:#4f46e5;">✨</div>
+              <div>
+                <strong>Featured Artwork</strong><br>
+                <small style="color:var(--text-muted)">Galaksi &amp; Literary Design</small>
+              </div>
+            </div>
+
+            <img src="/static/images/hero.jpg" alt="Freshie LMS Featured Artwork" class="hero-img">
+
+            <div class="floating-card card-bottom">
+              <div class="floating-card-icon" style="background:#ecfdf5; color:#059669;">✅</div>
+              <div>
+                <strong>In Catalog &amp; Ready</strong><br>
+                <small style="color:var(--text-muted)">Instant Check-out Available</small>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon green">📦</div>
-        <div class="stat-info">
-          <h3>Total Copies</h3>
-          <p id="stat-total-copies">0</p>
+
+      <!-- Quick KPI Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon indigo">📚</div>
+          <div class="stat-info">
+            <h3>Total Titles</h3>
+            <p class="stat-total-titles">0</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">📦</div>
+          <div class="stat-info">
+            <h3>Total Copies</h3>
+            <p class="stat-total-copies">0</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon amber">✅</div>
+          <div class="stat-info">
+            <h3>Available Copies</h3>
+            <p class="stat-available-copies">0</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon red">🔄</div>
+          <div class="stat-info">
+            <h3>Active Loans</h3>
+            <p class="stat-active-loans">0</p>
+          </div>
         </div>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon amber">✅</div>
-        <div class="stat-info">
-          <h3>Available</h3>
-          <p id="stat-available-copies">0</p>
+
+      <!-- Featured Catalog Preview -->
+      <div class="action-bar" style="margin-top: 1.5rem;">
+        <div>
+          <h2 class="section-header-title">Featured Books Preview</h2>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-top:0.2rem;">Recently cataloged books available for borrowing right now.</p>
         </div>
+        <button class="btn btn-secondary" onclick="switchTab('books')">View All Books ↗</button>
       </div>
-      <div class="stat-card">
-        <div class="stat-icon red">🔄</div>
-        <div class="stat-info">
-          <h3>Active Loans</h3>
-          <p id="stat-active-loans">0</p>
-        </div>
+
+      <div class="books-grid" id="home-preview-container">
+        <!-- Rendered dynamically via app.js -->
       </div>
+
     </section>
 
-    <!-- TAB 1: Books Catalog -->
-    <section id="view-books">
+    <!-- ====================================================================
+         TAB 2: BOOKS CATALOG
+         ==================================================================== -->
+    <section id="view-books" style="display: none;">
+      <div class="action-bar">
+        <div>
+          <h2 class="section-header-title">Books Catalog</h2>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-top:0.2rem;">Browse, search, edit, or borrow any book in the collection.</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-add-book')">+ Add New Book</button>
+      </div>
+
       <div class="action-bar">
         <div class="search-box">
           <span class="search-icon">🔍</span>
           <input type="text" id="search-books-input" placeholder="Search by title, author, or ISBN...">
         </div>
-        <button class="btn btn-primary" onclick="openModal('modal-add-book')">+ Add New Book</button>
       </div>
 
       <div class="books-grid" id="books-container">
@@ -84,8 +170,17 @@
       </div>
     </section>
 
-    <!-- TAB 2: Active Loans -->
+    <!-- ====================================================================
+         TAB 3: ACTIVE LOANS
+         ==================================================================== -->
     <section id="view-active-loans" style="display: none;">
+      <div class="action-bar">
+        <div>
+          <h2 class="section-header-title">Active Loans</h2>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-top:0.2rem;">Currently borrowed books awaiting return.</p>
+        </div>
+      </div>
+
       <div class="action-bar">
         <div class="search-box">
           <span class="search-icon">👤</span>
@@ -111,10 +206,15 @@
       </div>
     </section>
 
-    <!-- TAB 3: Loan History -->
+    <!-- ====================================================================
+         TAB 4: LOAN HISTORY
+         ==================================================================== -->
     <section id="view-history" style="display: none;">
       <div class="action-bar">
-        <h2 style="font-size: 1.25rem; font-weight: 700;">Complete Loan Transactions</h2>
+        <div>
+          <h2 class="section-header-title">Loan Transactions History</h2>
+          <p style="color:var(--text-muted); font-size:0.9rem; margin-top:0.2rem;">Full audit log of active loans and completed returns.</p>
+        </div>
       </div>
 
       <div class="table-container">
