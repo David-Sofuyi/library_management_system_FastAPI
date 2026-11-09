@@ -1,4 +1,4 @@
-# Library Management System (FastAPI + Frontend)
+# Freshie LMS (FastAPI + Frontend)
 
 A complete, full-stack Library Management System featuring:
 - **FastAPI backend** with SQLite & SQLAlchemy ORM

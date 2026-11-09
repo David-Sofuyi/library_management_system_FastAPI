@@ -43,7 +43,7 @@ def test_root_endpoint_serves_frontend(client):
     response = client.get("/")
     assert response.status_code == 200
     assert "Library Management System" in response.text
-    assert "Athena LMS" in response.text
+    assert "Freshie LMS" in response.text
 
 
 def test_health_endpoint(client):

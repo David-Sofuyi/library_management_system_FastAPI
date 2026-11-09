@@ -19,8 +19,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Library Management System API",
-    description="A FastAPI-based Library Management System with full frontend UI & SQLite ORM.",
+    title="Freshie LMS - Library Management System API",
+    description="A modern FastAPI-based Library Management System with full Freshie LMS frontend UI & SQLite ORM.",
     version="1.0.0",
     lifespan=lifespan,
 )
@@ -40,7 +40,7 @@ def serve_frontend():
     if os.path.exists(index_file):
         return FileResponse(index_file)
     return {
-        "message": "Welcome to the Library Management System API",
+        "message": "Welcome to Freshie LMS API",
         "documentation": "/docs",
         "redoc": "/redoc",
         "status": "healthy",
