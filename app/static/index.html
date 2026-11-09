@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Library Management System</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <a href="/" class="nav-brand">
+        <svg fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM3.45 9L12 4.34 20.55 9 12 13.66 3.45 9zM5 12.3v4.92c0 1.63 3.13 3.78 7 3.78s7-2.15 7-3.78V12.3l-7 3.82-7-3.82z"/>
+        </svg>
+        Athena LMS
+      </a>
+
+      <nav class="nav-tabs">
+        <button class="nav-tab-btn active" data-tab="books" onclick="switchTab('books')">Books Catalog</button>
+        <button class="nav-tab-btn" data-tab="active-loans" onclick="switchTab('active-loans')">Active Loans</button>
+        <button class="nav-tab-btn" data-tab="history" onclick="switchTab('history')">Loan History</button>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-add-book')">+ Add Book</button>
+        <button class="btn btn-secondary btn-sm" onclick="openBorrowModal()">Borrow</button>
+        <button class="btn btn-secondary btn-sm" onclick="openModal('modal-return')">Return</button>
+        <a href="/docs" target="_blank" class="btn btn-secondary btn-sm" title="Interactive Swagger API Documentation">API Docs ↗</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+
+    <!-- KPI Stats Cards -->
+    <section class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon indigo">📚</div>
+        <div class="stat-info">
+          <h3>Total Titles</h3>
+          <p id="stat-total-titles">0</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon green">📦</div>
+        <div class="stat-info">
+          <h3>Total Copies</h3>
+          <p id="stat-total-copies">0</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon amber">✅</div>
+        <div class="stat-info">
+          <h3>Available</h3>
+          <p id="stat-available-copies">0</p>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon red">🔄</div>
+        <div class="stat-info">
+          <h3>Active Loans</h3>
+          <p id="stat-active-loans">0</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 1: Books Catalog -->
+    <section id="view-books">
+      <div class="action-bar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-books-input" placeholder="Search by title, author, or ISBN...">
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-add-book')">+ Add New Book</button>
+      </div>
+
+      <div class="books-grid" id="books-container">
+        <!-- Rendered dynamically via app.js -->
+      </div>
+    </section>
+
+    <!-- TAB 2: Active Loans -->
+    <section id="view-active-loans" style="display: none;">
+      <div class="action-bar">
+        <div class="search-box">
+          <span class="search-icon">👤</span>
+          <input type="text" id="filter-borrower-input" placeholder="Filter active loans by Borrower ID...">
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Book Details</th>
+              <th>Borrower ID</th>
+              <th>Date Borrowed</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="active-loans-tbody">
+            <!-- Rendered dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 3: Loan History -->
+    <section id="view-history" style="display: none;">
+      <div class="action-bar">
+        <h2 style="font-size: 1.25rem; font-weight: 700;">Complete Loan Transactions</h2>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Book Details</th>
+              <th>Borrower ID</th>
+              <th>Date Borrowed</th>
+              <th>Date Returned</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="history-loans-tbody">
+            <!-- Rendered dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: Add Book -->
+  <div class="modal-overlay" id="modal-add-book">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Add New Book</h2>
+        <button class="modal-close-btn" onclick="closeModal('modal-add-book')">&times;</button>
+      </div>
+      <form id="form-add-book">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="add-isbn">ISBN *</label>
+            <input type="text" id="add-isbn" required placeholder="e.g. 978-0132350884">
+          </div>
+          <div class="form-group">
+            <label for="add-title">Title *</label>
+            <input type="text" id="add-title" required placeholder="e.g. Clean Code">
+          </div>
+          <div class="form-group">
+            <label for="add-author">Author *</label>
+            <input type="text" id="add-author" required placeholder="e.g. Robert C. Martin">
+          </div>
+          <div class="form-group">
+            <label for="add-copies">Total Copies *</label>
+            <input type="number" id="add-copies" min="1" value="1" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-add-book')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Book</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Edit Book -->
+  <div class="modal-overlay" id="modal-edit-book">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Edit Book</h2>
+        <button class="modal-close-btn" onclick="closeModal('modal-edit-book')">&times;</button>
+      </div>
+      <form id="form-edit-book">
+        <input type="hidden" id="edit-book-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="edit-title">Title</label>
+            <input type="text" id="edit-title" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-author">Author</label>
+            <input type="text" id="edit-author" required>
+          </div>
+          <div class="form-group">
+            <label for="edit-copies">Total Copies</label>
+            <input type="number" id="edit-copies" min="1" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-edit-book')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Borrow Book -->
+  <div class="modal-overlay" id="modal-borrow">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Borrow a Book</h2>
+        <button class="modal-close-btn" onclick="closeModal('modal-borrow')">&times;</button>
+      </div>
+      <form id="form-borrow-book">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="borrow-isbn">Book ISBN *</label>
+            <input type="text" id="borrow-isbn" required placeholder="Enter book ISBN">
+          </div>
+          <div class="form-group">
+            <label for="borrow-member">Borrower / Member ID *</label>
+            <input type="text" id="borrow-member" required placeholder="e.g. member-101">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-borrow')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Confirm Borrow</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Return Book -->
+  <div class="modal-overlay" id="modal-return">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Return a Book</h2>
+        <button class="modal-close-btn" onclick="closeModal('modal-return')">&times;</button>
+      </div>
+      <form id="form-return-book">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="return-isbn">Book ISBN *</label>
+            <input type="text" id="return-isbn" required placeholder="Enter book ISBN">
+          </div>
+          <div class="form-group">
+            <label for="return-member">Borrower / Member ID *</label>
+            <input type="text" id="return-member" required placeholder="e.g. member-101">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-return')">Cancel</button>
+          <button type="submit" class="btn btn-success">Confirm Return</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Application Script -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
